@@ -7,7 +7,6 @@
 <title>Транслятор раскладок</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background: #0f172a;
     color: #f1f5f9;
@@ -18,7 +17,6 @@
     min-height: 100vh;
     padding: 20px;
   }
-
   .app {
     width: 100%;
     max-width: 600px;
@@ -27,16 +25,13 @@
     padding: 24px;
     box-shadow: 0 8px 24px rgba(0,0,0,.4);
   }
-
   h1 { font-size: 18px; margin-bottom: 6px; }
-
   .subtitle {
     font-size: 13px;
     color: #94a3b8;
     margin-bottom: 20px;
     text-align: center;
   }
-
   .field {
     width: 100%;
     text-align: center;
@@ -50,18 +45,15 @@
     letter-spacing: 2px;
     outline: none;
   }
-
   .field:focus {
     border-color: #38bdf8;
     box-shadow: 0 0 0 3px rgba(56,189,248,.25);
   }
-
   .row {
     display: flex;
     gap: 8px;
     margin-bottom: 14px;
   }
-
   .seg {
     flex: 1;
     display: flex;
@@ -70,7 +62,6 @@
     padding: 4px;
     gap: 4px;
   }
-
   .seg button {
     flex: 1;
     background: transparent;
@@ -83,12 +74,10 @@
     cursor: pointer;
     transition: all .15s;
   }
-
   .seg button.active {
     background: #38bdf8;
     color: #0f172a;
   }
-
   .toggle {
     display: flex;
     align-items: center;
@@ -99,9 +88,7 @@
     margin-bottom: 18px;
     user-select: none;
   }
-
-  .toggle input { display: none; }
-
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
   .toggle .ball {
     width: 44px;
     height: 26px;
@@ -110,7 +97,6 @@
     position: relative;
     transition: .25s;
   }
-
   .toggle .ball::after {
     content: "";
     position: absolute;
@@ -122,21 +108,17 @@
     border-radius: 50%;
     transition: .25s;
   }
-
   .toggle input:checked + .ball {
     background: #38bdf8;
   }
-
   .toggle input:checked + .ball::after {
     background: #0f172a;
   }
-
   .actions {
     display: flex;
     gap: 10px;
     margin-top: 6px;
   }
-
   .actions button {
     flex: 1;
     padding: 16px;
@@ -147,21 +129,17 @@
     cursor: pointer;
     transition: .15s;
   }
-
   .btn-copy {
     background: #38bdf8;
     color: #0f172a;
   }
-
   .btn-copy:active {
     background: #0ea5e9;
   }
-
   .btn-clear {
     background: #334155;
     color: #f1f5f9;
   }
-
   .msg {
     margin-top: 14px;
     text-align: center;
@@ -170,214 +148,159 @@
     min-height: 22px;
     transition: .2s;
   }
-
   .msg.active { color: #4ade80; }
-
   .field.out {
     font-family: monospace;
     letter-spacing: 2px;
     font-weight: 700;
   }
-
   .field.out.aster {
     letter-spacing: 4px;
   }
 </style>
-</head>
-<body>
-  <div class="app">
-    <h1>Транслятор раскладок</h1>
-    <p class="subtitle">Вводите текст на одной раскладке — видите результат на другой</p>
-
-    <input id="input" class="field" type="text" placeholder="Текст для преобразования..." autocomplete="off" spellcheck="false">
-
-    <div class="row">
-      <div class="seg">
-        <button data-lang="rus" class="active">Русский → Английский</button>
-        <button data-lang="eng">Английский → Русский</button>
-      </div>
-    </div>
-
-    <div class="toggle">
-      <label for="aster">Показывать звёздочки</label>
-      <input type="checkbox" id="aster">
-      <span class="ball"></span>
-    </div>
-
-    <input id="output" class="field out" type="text" readonly placeholder="—" autocomplete="off">
-
-    <div class="actions">
-      <button id="copyBtn" class="btn-copy">Копировать</button>
-      <button id="clearBtn" class="btn-clear">Очистить</button>
-    </div>
-
-    <div id="msg" class="msg"></div>
-  </div>
-
 <script>
-(function() {
-  'use strict';
+// Карта раскладок: русский -> английский
+var cyr2lat = {
+  "й":"q","ц":"w","у":"e","к":"r","е":"t","н":"y","г":"u","ш":"i","щ":"o","з":"p","х":"[","ъ":"]","ё":"e",
+  "ф":"a","ы":"s","в":"d","а":"f","п":"g","р":"h","о":"j","л":"k","д":"l","ж":";","э":"'","я":"z",
+  "ч":"x","с":"c","м":"v","и":"b","т":"n","ь":"m","б":",","ю":"."," ":"-",
+  "Й":"Q","Ц":"W","У":"E","К":"R","Е":"T","Н":"Y","Г":"U","Ш":"I","Щ":"O","З":"P","Х":"[","Ъ":"]","Ё":"E",
+  "Ф":"A","Ы":"S","В":"D","А":"F","П":"G","Р":"H","О":"J","Л":"K","Д":"L","Ж":";","Э":"'","Я":"Z",
+  "Ч":"X","С":"C","М":"V","И":"B","Т":"N","Ь":"M","Б":",","Ю":"."," ":"-"
+};
 
-  // Карта раскладок: русский → английский (по позициям клавиш QWERTY)
-  var cyr2lat = {
-    "й":"q","ц":"w","у":"e","к":"r","е":"t","н":"y","г":"u","ш":"i","щ":"o","з":"p","х":"[","ъ":"]","ё":"0",
-    "ф":"a","ы":"s","в":"d","а":"f","п":"g","р":"h","о":"j","л":"k","д":"l","ж":";","э":"'","я":"z",
-    "ч":"x","с":"c","м":"v","и":"b","т":"n","ь":"m","б":",","ю":".", " ":"-",
-    "Й":"Q","Ц":"W","У":"E","К":"R","Е":"T","Н":"Y","Г":"U","Ш":"I","Щ":"O","З":"P","Х":"[","Ъ":"]","Ё":"0",
-    "Ф":"A","Ы":"S","В":"D","А":"F","П":"G","Р":"H","О":"J","Л":"K","Д":"L","Ж":";","Э":"'","Я":"Z",
-    "Ч":"X","С":"C","М":"V","И":"B","Т":"N","Ь":"M","Б":".","Ю":"."," ":"-"
-  };
-
-  // Инвертированный словарь для обратного преобразования
-  var lat2cyr = {};
-  var lat2cyrUp = {};
-  for (var key in cyr2lat) {
-    if (cyr2lat.hasOwnProperty(key)) {
-      var val = cyr2lat[key];
-      if (key === " ") continue;
-      var lowerKey = key.toLowerCase();
-      var lowerVal = val.toLowerCase();
-      lat2cyr[lowerVal] = lowerKey;
-      lat2cyrUp[val] = key;
-    }
+var lat2cyr = {};
+var lat2cyrUp = {};
+for (var key in cyr2lat) {
+  if (cyr2lat.hasOwnProperty(key)) {
+    var val = cyr2lat[key];
+    if (key === " ") continue;
+    var lowerKey = key.toLowerCase();
+    var lowerVal = val.toLowerCase();
+    lat2cyr[lowerVal] = lowerKey;
+    lat2cyrUp[val] = key;
   }
+}
 
-  // Элементы
-  var inputEl = document.getElementById('input');
-  var outputEl = document.getElementById('output');
-  var langSeg = document.querySelector('.seg');
-  var asterChk = document.getElementById('aster');
-  var copyBtn = document.getElementById('copyBtn');
-  var clearBtn = document.getElementById('clearBtn');
-  var msg = document.getElementById('msg');
+var inputEl = document.getElementById('input');
+var outputEl = document.getElementById('output');
+var langSeg = document.querySelector('.seg');
+var asterChk = document.getElementById('aster');
+var copyBtn = document.getElementById('copyBtn');
+var clearBtn = document.getElementById('clearBtn');
+var msg = document.getElementById('msg');
+var lang = 'rus';
 
-  var lang = 'rus'; // 'rus' | 'eng'
-
-  // Обработчик: когда меняется язык — нужно пересчитать
-  langSeg.addEventListener('click', function(e) {
-    var btn = e.target.closest('button');
-    if (!btn) return;
-    langSeg.querySelector('button').classList.remove('active');
-    btn.classList.add('active');
-    lang = btn.dataset.lang;
-    recalc();
-  });
-
-  // Обработчик: ввод текста → мгновенное преобразование
-  inputEl.addEventListener('input', recalc);
-
-  // Флажок звёздочек
-  asterChk.addEventListener('change', recalc);
-
-  // Очистка
-  clearBtn.addEventListener('click', function() {
-    inputEl.value = '';
-    outputEl.value = '';
-    msg.textContent = '';
-    inputEl.focus();
-  });
-
-  // Копирование
-  copyBtn.addEventListener('click', function() {
-    var outVal = outputEl.value;
-    if (!outVal) {
-      msg.textContent = 'Нет данных для копирования';
-      msg.className = 'msg';
-      return;
-    }
-
-    // Сохраняем в буфер обмена
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(outVal).then(function() {
-        showMsg('Скопировано в буфер', true);
-        clearFields();
-      }).catch(function() {
-        fallbackCopy(outVal);
-      });
-    } else {
-      fallbackCopy(outVal);
-    }
-  });
-
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      msg.textContent = 'Скопировано (ручной режим)';
-      msg.className = 'msg active';
-    } catch (e) {
-      msg.textContent = 'Ошибка копирования';
-      msg.className = 'msg';
-    }
-    document.body.removeChild(ta);
-    setTimeout(function() { msg.className = 'msg'; }, 1500);
-  }
-
-  function showMsg(text, ok) {
-    msg.textContent = text;
-    msg.className = 'msg' + (ok ? ' active' : '');
-    setTimeout(function() { msg.className = 'msg'; }, 1500);
-  }
-
-  function clearFields() {
-    inputEl.value = '';
-    outputEl.value = '';
-    msg.textContent = '';
-    inputEl.focus();
-  }
-
-  // Пересчёт вывода
-  function recalc() {
-    var text = inputEl.value;
-    var transformed = transform(text, lang);
-    var display = asterChk.checked ? '*'.repeat(transformed.length) : transformed;
-    outputEl.value = display;
-    // Add aster class for styling
-    if (asterChk.checked) {
-      outputEl.classList.add('aster');
-    } else {
-      outputEl.classList.remove('aster');
-    }
-  }
-
-  // Преобразование одного символа
-  function transformChar(ch, lang) {
-    if (lang === 'rus') {
-      // Ввод русский → вывод английский (или наоборот, если буква латинская)
-      if (ch in cyr2lat) {
-        return cyr2lat[ch];
-      }
-      // Латинская буква → ищем в обратном направлении
-      if (ch.toLowerCase() in lat2cyr) {
-        return lat2cyr[ch.toLowerCase()];
-      }
-      return ch;
-    } else {
-      // Ввод английский → вывод русский
-      if (ch in lat2cyrUp) {
-        return lat2cyrUp[ch];
-      }
-      if (ch.toLowerCase() in lat2cyr) {
-        return lat2cyr[ch.toLowerCase()];
-      }
-      return ch;
-    }
-  }
-
-  function transform(text, lang) {
-    return Array.prototype.map.call(text, function(ch) {
-      return transformChar(ch, lang);
-    }).join('');
-  }
-
-  // Старт
+langSeg.addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  langSeg.querySelector('button').classList.remove('active');
+  btn.classList.add('active');
+  lang = btn.dataset.lang;
   recalc();
-})();
+});
+
+inputEl.addEventListener('input', recalc);
+
+asterChk.addEventListener('change', recalc);
+
+clearBtn.addEventListener('click', function() {
+  inputEl.value = '';
+  outputEl.value = '';
+  msg.textContent = '';
+  inputEl.focus();
+});
+
+copyBtn.addEventListener('click', function() {
+  var outVal = outputEl.value;
+  if (!outVal) {
+    msg.textContent = 'Нет данных для копирования';
+    msg.className = 'msg';
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(outVal).then(function() {
+      showMsg('Скопировано в буфер', true);
+      clearFields();
+    }).catch(function() {
+      fallbackCopy(outVal);
+    });
+  } else {
+    fallbackCopy(outVal);
+  }
+});
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    msg.textContent = 'Скопировано (ручной режим)';
+    msg.className = 'msg active';
+  } catch (e) {
+    msg.textContent = 'Ошибка копирования';
+    msg.className = 'msg';
+  }
+  document.body.removeChild(ta);
+  setTimeout(function() { msg.className = 'msg'; }, 1500);
+}
+
+function showMsg(text, ok) {
+  msg.textContent = text;
+  msg.className = 'msg' + (ok ? ' active' : '');
+  setTimeout(function() { msg.className = 'msg'; }, 1500);
+}
+
+function clearFields() {
+  inputEl.value = '';
+  outputEl.value = '';
+  msg.textContent = '';
+  inputEl.focus();
+}
+
+function recalc() {
+  var text = inputEl.value;
+  var transformed = transform(text, lang);
+  var display = asterChk.checked ? '*'.repeat(transformed.length) : transformed;
+  outputEl.value = display;
+  if (asterChk.checked) {
+    outputEl.classList.add('aster');
+  } else {
+    outputEl.classList.remove('aster');
+  }
+}
+
+function transformChar(ch, lang) {
+  if (lang === 'rus') {
+    if (ch in cyr2lat) {
+      return cyr2lat[ch];
+    }
+    if (ch.toLowerCase() in lat2cyr) {
+      return lat2cyr[ch.toLowerCase()];
+    }
+    return ch;
+  } else {
+    if (ch in lat2cyrUp) {
+      return lat2cyrUp[ch];
+    }
+    if (ch.toLowerCase() in lat2cyr) {
+      return lat2cyr[ch.toLowerCase()];
+    }
+    return ch;
+  }
+}
+
+function transform(text, lang) {
+  return Array.prototype.map.call(text, function(ch) {
+    return transformChar(ch, lang);
+  }).join('');
+}
+
+recalc();
 </script>
 </body>
 </html>
