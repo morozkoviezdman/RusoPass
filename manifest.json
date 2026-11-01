@@ -1,0 +1,13 @@
+{
+  "name": "Панель транслятора раскладок",
+  "short_name": "Транслятор",
+  "description": "Преобразует текст между русской и английской раскладками клавиатуры",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": {
+    "192x192": "icon.png",
+    "512x512": "icon.png"
+  }
+}
