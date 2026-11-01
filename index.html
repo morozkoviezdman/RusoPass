@@ -32,6 +32,30 @@
     margin-bottom: 20px;
     text-align: center;
   }
+  .fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .field {
+    width: 100%;
+    text-align: center;
+    font-size: 22px;
+    padding: 16px 18px;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    background: #0f172a;
+    color: #f1f5f9;
+    font-family: monospace;
+    letter-spacing: 2px;
+    outline: none;
+    min-height: 52px;
+  }
+  .field:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56,189,248,.25);
+  }
   .row {
     display: flex;
     gap: 8px;
@@ -60,30 +84,6 @@
   .seg button.active {
     background: #38bdf8;
     color: #0f172a;
-  }
-  .fields {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-  .field {
-    width: 100%;
-    text-align: center;
-    font-size: 22px;
-    padding: 16px 18px;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    background: #0f172a;
-    color: #f1f5f9;
-    font-family: monospace;
-    letter-spacing: 2px;
-    outline: none;
-    min-height: 52px;
-  }
-  .field:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56,189,248,.25);
   }
   .toggle {
     display: flex;
@@ -175,6 +175,13 @@
 <div class="app">
   <h1>Транслятор раскладок</h1>
   <p class="subtitle">Русский ↔ Английская раскладка</p>
+  
+  <div class="row">
+    <div class="seg">
+      <button data-lang="rus" class="active">Русский → Английский</button>
+      <button data-lang="eng">Английский → Русский</button>
+    </div>
+  </div>
   
   <div class="fields">
     <input class="field" id="input" placeholder="Введите текст...">
