@@ -244,7 +244,12 @@ langSeg.addEventListener('click', function(e) {
     btn = btn.parentNode;
   }
   if (!btn || !btn.dataset || !btn.dataset.lang) return;
-  langSeg.querySelector('button').classList.remove('active');
+  // Удаляем active у ВСЕХ кнопок
+  var buttons = langSeg.querySelectorAll('button');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active');
+  }
+  // Добавляем active только к нажатой
   btn.classList.add('active');
   lang = btn.dataset.lang;
   recalc();
