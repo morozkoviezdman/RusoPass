@@ -19,10 +19,10 @@
   }
   .app {
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     background: #1e293b;
     border-radius: 12px;
-    padding: 24px;
+    padding: 28px;
     box-shadow: 0 8px 24px rgba(0,0,0,.4);
   }
   h1 { font-size: 18px; margin-bottom: 6px; }
@@ -61,11 +61,17 @@
     background: #38bdf8;
     color: #0f172a;
   }
+  .fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
   .field {
     width: 100%;
     text-align: center;
     font-size: 22px;
-    padding: 18px;
+    padding: 16px 18px;
     border: 1px solid #334155;
     border-radius: 10px;
     background: #0f172a;
@@ -73,6 +79,7 @@
     font-family: monospace;
     letter-spacing: 2px;
     outline: none;
+    min-height: 52px;
   }
   .field:focus {
     border-color: #38bdf8;
@@ -81,7 +88,7 @@
   .toggle {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     font-size: 14px;
     color: #94a3b8;
@@ -169,20 +176,13 @@
   <h1>Транслятор раскладок</h1>
   <p class="subtitle">Русский ↔ Английская раскладка</p>
   
-  <div class="row">
-    <div class="seg">
-      <button data-lang="rus" class="active">Русский → Английский</button>
-      <button data-lang="eng">Английский → Русский</button>
-    </div>
-  </div>
-  
-  <div class="row">
+  <div class="fields">
     <input class="field" id="input" placeholder="Введите текст...">
     <input class="field out" id="output" readonly>
   </div>
   
   <label class="toggle">
-    <input type="checkbox" id="aster">
+    <input type="checkbox" id="aster" checked>
     <span class="ball"></span>
     Звездочки
   </label>
