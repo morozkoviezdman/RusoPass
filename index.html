@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f172a">
 <title>RusoPass - транслятор раскладки</title>
+<meta name="version" content="1.0.0">
+<link rel="manifest" href="manifest.json">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -32,12 +34,132 @@
     margin-bottom: 20px;
     text-align: center;
   }
-  .fields {
+  .version-row {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 18px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #334155;
+    border-radius: 8px;
+    margin-bottom: 20px;
   }
+  .version-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  .version-info .version {
+    color: #f1f5f9;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .info-icon {
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background .2s;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+  }
+  .info-icon:hover {
+    background: #334155;
+    color: #fff;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    border-radius: 12px 12px 0 0;
+    padding: 20px;
+    max-height: 50vh;
+    overflow-y: auto;
+    box-shadow: 0 -8px 24px rgba(0,0,0,.4);
+    z-index: 1000;
+    animation: slideUp .2s ease;
+  }
+  .modal.show {
+    display: block;
+  }
+  .modal header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .modal header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #f1f5f9;
+  }
+  .modal header .close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background .15s;
+  }
+  .modal header .close:hover {
+    background: #334155;
+    color: #fff;
+  }
+  .modal p {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .modal .platform {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+    color: #fff;
+  }
+  .modal .platform-ios { background: #007aff; }
+  .modal .platform-android { background: #3d81f3; }
+  .modal .version-badge {
+    display: inline-block;
+    background: #334155;
+    color: #94a3b8;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .modal .version-badge strong {
+    color: #f1f5f9;
+    font-weight: 600;
+  }
+  .msg {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: #94a3b8;
+    min-height: 22px;
+    transition: .2s;
+  }
+  .msg.active { color: #4ade80; }
   .field {
     width: 100%;
     text-align: center;
@@ -55,6 +177,12 @@
   .field:focus {
     border-color: #38bdf8;
     box-shadow: 0 0 0 3px rgba(56,189,248,.25);
+  }
+  .fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
   }
   .row {
     display: flex;
@@ -152,15 +280,6 @@
     background: #334155;
     color: #f1f5f9;
   }
-  .msg {
-    margin-top: 14px;
-    text-align: center;
-    font-size: 14px;
-    color: #94a3b8;
-    min-height: 22px;
-    transition: .2s;
-  }
-  .msg.active { color: #4ade80; }
   .field.out {
     font-family: monospace;
     letter-spacing: 2px;
@@ -199,14 +318,13 @@
     font-size: 11px;
     font-weight: 600;
     margin-right: 8px;
-  }
-  .settings-hint .platform-ios {
-    background: #007aff;
     color: #fff;
   }
-  .settings-hint .platform-android {
-    background: #3d81f3;
-    color: #fff;
+  .settings-hint .platform-ios { background: #007aff; }
+  .settings-hint .platform-android { background: #3d81f3; }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 </style>
 </head>
@@ -215,23 +333,37 @@
   <h1 class="app-title">RusoPass - транслятор раскладки</h1>
   <p class="subtitle">Русский ↔ Английская раскладка</p>
   
-  <div class="row">
-    <div class="seg">
-      <button data-lang="rus" class="active">Русский → Английский</button>
-      <button data-lang="eng">Английский → Русский</button>
+  <div class="version-row">
+    <div class="version-info">
+      <span class="version">v1.0.0</span>
+      <span class="info-icon" id="infoIcon" title="Показать изменения">ℹ️</span>
+    </div>
+    <div class="modal" id="versionModal">
+      <header>
+        <h3>Что нового</h3>
+        <button class="close" id="closeModal">✕</button>
+      </header>
+      <p><span class="version-badge"><strong>v1.0.0</strong> — релиз</span></p>
+      <p>&nbsp;</p>
+      <p><strong>Добавлено:</strong></p>
+      <ol>
+        <li>Переключение языка (Русский ↔ Английский) — первая версия транслятора.</li>
+        <li>Полнотекстовый режим и режим звездочек для скрытия текста.</li>
+        <li>Кнопки «Скопировать» и «Очистить» для удобной работы.</li>
+        <li>Поддержка iOS и Android — установка как настольного приложения.</li>
+        <li>Иконка-заглушка при загрузке (скрывает текст до загрузки JS).</li>
+      </ol>
+      <p style="margin-top:10px;"><strong>Исправлено:</strong></p>
+      <ol>
+        <li>Исправлены маппинги клавиатурных переводов (о, л, д, ж, э, ё, Ё, Б, Д, Ж, Э).</li>
+        <li>Исправлено отображение звездочек при переключении режима.</li>
+        <li>Улучшена работоспособность кнопок переключения языка.</li>
+      </ol>
+      <p style="text-align:center; margin-top:12px; color:#94a3b8;">
+        Полный список изменений: <a href="https://github.com/morozkoviezdman/RusoPass/commits/main" style="color:#38bdf8;">github.com/morozkoviezdman/RusoPass/commits/main</a>
+      </p>
     </div>
   </div>
-  
-  <div class="fields">
-    <input class="field" id="input" placeholder="Введите текст...">
-    <input class="field out" id="output" readonly>
-  </div>
-  
-  <label class="toggle">
-    <input type="checkbox" id="aster" checked>
-    <span class="ball"></span>
-    Звездочки
-  </label>
   
   <div class="actions">
     <button class="btn-copy" id="copyBtn">Скопировать</button>
@@ -239,7 +371,6 @@
   </div>
   
   <div class="msg" id="msg"></div>
-  
   <div class="settings-hint">
     <h3>📱 Как добавить на свой рабочий экран?</h3>
     <ol>
@@ -287,6 +418,9 @@ var copyBtn = document.getElementById('copyBtn');
 var clearBtn = document.getElementById('clearBtn');
 var msg = document.getElementById('msg');
 var lang = 'rus';
+var infoIcon = document.getElementById('infoIcon');
+var versionModal = document.getElementById('versionModal');
+var closeModal = document.getElementById('closeModal');
 
 langSeg.addEventListener('click', function(e) {
   var btn = e.target;
@@ -297,12 +431,10 @@ langSeg.addEventListener('click', function(e) {
     btn = btn.parentNode;
   }
   if (!btn || !btn.dataset || !btn.dataset.lang) return;
-  // Удаляем active у ВСЕХ кнопок
   var buttons = langSeg.querySelectorAll('button');
   for (var i = 0; i < buttons.length; i++) {
     buttons[i].classList.remove('active');
   }
-  // Добавляем active только к нажатой
   btn.classList.add('active');
   lang = btn.dataset.lang;
   recalc();
@@ -335,6 +467,20 @@ copyBtn.addEventListener('click', function() {
     });
   } else {
     fallbackCopy(outVal);
+  }
+});
+
+infoIcon.addEventListener('click', function() {
+  versionModal.classList.add('show');
+});
+
+closeModal.addEventListener('click', function() {
+  versionModal.classList.remove('show');
+});
+
+window.addEventListener('click', function(e) {
+  if (e.target === versionModal) {
+    versionModal.classList.remove('show');
   }
 });
 
