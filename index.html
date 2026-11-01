@@ -220,21 +220,33 @@
     color: #0f172a;
     box-shadow: inset 0 2px 4px rgba(0,0,0,.2);
   }
-  .toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 18px;
+    user-select: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background .15s;
   }
-  .toggle .ball {
-    width: 44px;
+  .toggle:hover {
+    background: #334155;
+  }
+  .toggle .switch {
+    position: relative;
+    width: 48px;
     height: 26px;
     background: #334155;
     border-radius: 13px;
-    position: relative;
     transition: .25s;
+    flex-shrink: 0;
+    cursor: pointer;
   }
-  .toggle .ball::after {
+  .toggle .switch::after {
     content: "";
     position: absolute;
     top: 3px;
@@ -245,11 +257,18 @@
     border-radius: 50%;
     transition: .25s;
   }
-  .toggle input:checked + .ball {
+  .toggle input:checked + .switch {
     background: #38bdf8;
   }
-  .toggle input:checked + .ball::after {
+  .toggle input:checked + .switch::after {
+    left: 25px;
     background: #0f172a;
+  }
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
   }
   .actions {
     display: flex;
@@ -372,9 +391,9 @@
   </div>
   
   <label class="toggle">
+    <span class="switch"></span>
     <input type="checkbox" id="aster" checked>
-    <span class="ball"></span>
-    Звездочки
+    <span class="toggle-label">Звездочки</span>
   </label>
   
   <div class="actions">
