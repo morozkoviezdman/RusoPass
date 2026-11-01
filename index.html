@@ -236,32 +236,32 @@
   .toggle:hover {
     background: #334155;
   }
-  .toggle .switch {
+  .toggle .ball {
     position: relative;
-    width: 48px;
-    height: 26px;
+    width: 44px;
+    height: 24px;
     background: #334155;
-    border-radius: 13px;
+    border-radius: 12px;
     transition: .25s;
-    flex-shrink: 0;
     cursor: pointer;
+    flex-shrink: 0;
   }
-  .toggle .switch::after {
+  .toggle .ball::after {
     content: "";
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background: #e2e8f0;
     border-radius: 50%;
     transition: .25s;
   }
-  .toggle input:checked + .switch {
+  .toggle input:checked + .ball {
     background: #38bdf8;
   }
-  .toggle input:checked + .switch::after {
-    left: 25px;
+  .toggle input:checked + .ball::after {
+    left: 22px;
     background: #0f172a;
   }
   .toggle input {
