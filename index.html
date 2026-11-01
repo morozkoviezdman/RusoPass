@@ -229,8 +229,14 @@ var msg = document.getElementById('msg');
 var lang = 'rus';
 
 langSeg.addEventListener('click', function(e) {
-  var btn = e.target.closest('button');
-  if (!btn) return;
+  var btn = e.target;
+  while (btn && btn !== document.documentElement) {
+    if (btn.dataset && btn.dataset.lang) {
+      break;
+    }
+    btn = btn.parentNode;
+  }
+  if (!btn || !btn.dataset || !btn.dataset.lang) return;
   langSeg.querySelector('button').classList.remove('active');
   btn.classList.add('active');
   lang = btn.dataset.lang;
