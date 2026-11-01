@@ -32,23 +32,6 @@
     margin-bottom: 20px;
     text-align: center;
   }
-  .field {
-    width: 100%;
-    text-align: center;
-    font-size: 22px;
-    padding: 18px;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    background: #0f172a;
-    color: #f1f5f9;
-    font-family: monospace;
-    letter-spacing: 2px;
-    outline: none;
-  }
-  .field:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56,189,248,.25);
-  }
   .row {
     display: flex;
     gap: 8px;
@@ -78,6 +61,23 @@
     background: #38bdf8;
     color: #0f172a;
   }
+  .field {
+    width: 100%;
+    text-align: center;
+    font-size: 22px;
+    padding: 18px;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    background: #0f172a;
+    color: #f1f5f9;
+    font-family: monospace;
+    letter-spacing: 2px;
+    outline: none;
+  }
+  .field:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56,189,248,.25);
+  }
   .toggle {
     display: flex;
     align-items: center;
@@ -88,7 +88,12 @@
     margin-bottom: 18px;
     user-select: none;
   }
-  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
   .toggle .ball {
     width: 44px;
     height: 26px;
@@ -158,6 +163,38 @@
     letter-spacing: 4px;
   }
 </style>
+</head>
+<body>
+<div class="app">
+  <h1>Транслятор раскладок</h1>
+  <p class="subtitle">Русский ↔ Английская раскладка</p>
+  
+  <div class="row">
+    <div class="seg">
+      <button data-lang="rus" class="active">Русский → Английский</button>
+      <button data-lang="eng">Английский → Русский</button>
+    </div>
+  </div>
+  
+  <div class="row">
+    <input class="field" id="input" placeholder="Введите текст...">
+    <input class="field out" id="output" readonly>
+  </div>
+  
+  <label class="toggle">
+    <input type="checkbox" id="aster">
+    <span class="ball"></span>
+    Звездочки
+  </label>
+  
+  <div class="actions">
+    <button class="btn-copy" id="copyBtn">Скопировать</button>
+    <button class="btn-clear" id="clearBtn">Очистить</button>
+  </div>
+  
+  <div class="msg" id="msg"></div>
+</div>
+
 <script>
 // Карта раскладок: русский -> английский
 var cyr2lat = {
