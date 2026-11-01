@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f172a">
-<title>Транслятор раскладок</title>
+<title>RusoPass - транслятор раскладки</title>
+<meta name="version" content="1.0.0">
+<link rel="manifest" href="manifest.json">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background: #0f172a;
     color: #f1f5f9;
@@ -18,30 +19,158 @@
     min-height: 100vh;
     padding: 20px;
   }
-
   .app {
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     background: #1e293b;
     border-radius: 12px;
-    padding: 24px;
+    padding: 28px;
     box-shadow: 0 8px 24px rgba(0,0,0,.4);
   }
-
   h1 { font-size: 18px; margin-bottom: 6px; }
-
   .subtitle {
     font-size: 13px;
     color: #94a3b8;
     margin-bottom: 20px;
     text-align: center;
   }
-
+  .version-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #334155;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .version-date {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-left: 4px;
+    vertical-align: super;
+  }
+  .version-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  .version-info .version {
+    color: #f1f5f9;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .info-icon {
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background .2s;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+  }
+  .info-icon:hover {
+    background: #334155;
+    color: #fff;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    border-radius: 12px 12px 0 0;
+    padding: 20px;
+    max-height: 50vh;
+    overflow-y: auto;
+    box-shadow: 0 -8px 24px rgba(0,0,0,.4);
+    z-index: 1000;
+    animation: slideUp .2s ease;
+  }
+  .modal.show {
+    display: block;
+  }
+  .modal header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .modal header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #f1f5f9;
+  }
+  .modal header .close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background .15s;
+  }
+  .modal header .close:hover {
+    background: #334155;
+    color: #fff;
+  }
+  .modal p {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .modal .platform {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+    color: #fff;
+  }
+  .modal .platform-ios { background: #007aff; }
+  .modal .platform-android { background: #3d81f3; }
+  .modal .version-badge {
+    display: inline-block;
+    background: #334155;
+    color: #94a3b8;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .modal .version-badge strong {
+    color: #f1f5f9;
+    font-weight: 600;
+  }
+  .msg {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: #94a3b8;
+    min-height: 22px;
+    transition: .2s;
+  }
+  .msg.active { color: #4ade80; }
   .field {
     width: 100%;
     text-align: center;
     font-size: 22px;
-    padding: 18px;
+    padding: 16px 18px;
     border: 1px solid #334155;
     border-radius: 10px;
     background: #0f172a;
@@ -49,94 +178,103 @@
     font-family: monospace;
     letter-spacing: 2px;
     outline: none;
+    min-height: 52px;
   }
-
   .field:focus {
     border-color: #38bdf8;
     box-shadow: 0 0 0 3px rgba(56,189,248,.25);
   }
-
+  .fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
   .row {
     display: flex;
     gap: 8px;
     margin-bottom: 14px;
   }
-
   .seg {
-    flex: 1;
     display: flex;
     background: #334155;
     border-radius: 8px;
     padding: 4px;
+    border: 1px solid #475569;
     gap: 4px;
   }
-
   .seg button {
     flex: 1;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 12px;
+    background: #334155;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
     font-weight: 600;
     color: #94a3b8;
     cursor: pointer;
     transition: all .15s;
   }
-
   .seg button.active {
     background: #38bdf8;
     color: #0f172a;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.2);
   }
-
   .toggle {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     font-size: 14px;
     color: #94a3b8;
     margin-bottom: 18px;
     user-select: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background .15s;
   }
-
-  .toggle input { display: none; }
-
-  .toggle .ball {
-    width: 44px;
-    height: 26px;
+  .toggle:hover {
     background: #334155;
-    border-radius: 13px;
-    position: relative;
-    transition: .25s;
   }
-
+  .toggle .ball {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: #334155;
+    border-radius: 12px;
+    transition: .25s;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
   .toggle .ball::after {
     content: "";
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background: #e2e8f0;
     border-radius: 50%;
     transition: .25s;
   }
-
-  .toggle input:checked + .ball {
+  .toggle input:checked ~ .ball {
     background: #38bdf8;
   }
-
-  .toggle input:checked + .ball::after {
+  .toggle input:checked ~ .ball::after {
+    left: 22px;
     background: #0f172a;
   }
-
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
   .actions {
     display: flex;
     gap: 10px;
     margin-top: 6px;
   }
-
   .actions button {
     flex: 1;
     padding: 16px;
@@ -147,237 +285,307 @@
     cursor: pointer;
     transition: .15s;
   }
-
   .btn-copy {
     background: #38bdf8;
     color: #0f172a;
   }
-
   .btn-copy:active {
     background: #0ea5e9;
   }
-
   .btn-clear {
     background: #334155;
     color: #f1f5f9;
   }
-
-  .msg {
-    margin-top: 14px;
-    text-align: center;
-    font-size: 14px;
-    color: #94a3b8;
-    min-height: 22px;
-    transition: .2s;
-  }
-
-  .msg.active { color: #4ade80; }
-
   .field.out {
     font-family: monospace;
     letter-spacing: 2px;
     font-weight: 700;
   }
-
   .field.out.aster {
     letter-spacing: 4px;
+  }
+  .settings-hint {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .settings-hint h3 {
+    color: #f1f5f9;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .settings-hint ol {
+    margin-left: 20px;
+    color: #94a3b8;
+    padding-left: 20px;
+  }
+  .settings-hint li {
+    margin-bottom: 6px;
+  }
+  .settings-hint .platform {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+    color: #fff;
+  }
+  .settings-hint .platform-ios { background: #007aff; }
+  .settings-hint .platform-android { background: #3d81f3; }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 </style>
 </head>
 <body>
-  <div class="app">
-    <h1>Транслятор раскладок</h1>
-    <p class="subtitle">Вводите текст на одной раскладке — видите результат на другой</p>
-
-    <input id="input" class="field" type="text" placeholder="Текст для преобразования..." autocomplete="off" spellcheck="false">
-
-    <div class="row">
-      <div class="seg">
-        <button data-lang="rus" class="active">Русский → Английский</button>
-        <button data-lang="eng">Английский → Русский</button>
-      </div>
+<div class="app">
+  <h1 class="app-title">RusoPass - транслятор раскладки</h1>
+  <p class="subtitle">Русский ↔ Английская раскладка</p>
+  
+  <div class="version-row">
+    <div class="version-info">
+      <span class="version">v1.0.0</span> — <span class="version-date">2026-11-01</span>
+      <span class="info-icon" id="infoIcon" title="Показать изменения">ℹ️</span>
     </div>
-
-    <div class="toggle">
-      <label for="aster">Показывать звёздочки</label>
-      <input type="checkbox" id="aster">
-      <span class="ball"></span>
+    <div class="modal" id="versionModal">
+      <header>
+        <h3>Что нового</h3>
+        <button class="close" id="closeModal">✕</button>
+      </header>
+      <p><span class="version-badge"><strong>v1.0.0</strong> — релиз</span></p>
+      <p>&nbsp;</p>
+      <p><strong>Добавлено:</strong></p>
+      <ol>
+        <li>Переключение языка (Русский ↔ Английский) — первая версия транслятора.</li>
+        <li>Полнотекстовый режим и режим звездочек для скрытия текста.</li>
+        <li>Кнопки «Скопировать» и «Очистить» для удобной работы.</li>
+        <li>Поддержка iOS и Android — установка как настольного приложения.</li>
+        <li>Иконка-заглушка при загрузке (скрывает текст до загрузки JS).</li>
+      </ol>
+      <p style="margin-top:10px;"><strong>Исправлено:</strong></p>
+      <ol>
+        <li>Исправлены маппинги клавиатурных переводов (о, л, д, ж, э, ё, Ё, Б, Д, Ж, Э).</li>
+        <li>Исправлено отображение звездочек при переключении режима.</li>
+        <li>Улучшена работоспособность кнопок переключения языка.</li>
+      </ol>
+      <p style="text-align:center; margin-top:12px; color:#94a3b8;">
+        Полный список изменений: <a href="https://github.com/morozkoviezdman/RusoPass/commits/main" style="color:#38bdf8;">github.com/morozkoviezdman/RusoPass/commits/main</a>
+      </p>
     </div>
-
-    <input id="output" class="field out" type="text" readonly placeholder="—" autocomplete="off">
-
-    <div class="actions">
-      <button id="copyBtn" class="btn-copy">Копировать</button>
-      <button id="clearBtn" class="btn-clear">Очистить</button>
-    </div>
-
-    <div id="msg" class="msg"></div>
   </div>
+  
+  <div class="fields">
+      <input class="field" id="input" placeholder="Введите текст...">
+      <input class="field out" id="output" readonly>
+    </div>
+  <div class="seg">
+    <button data-lang="rus" class="active">Русский</button>
+    <button data-lang="eng">Английский</button>
+  </div>
+  
+  <label class="toggle-check">
+    <input type="checkbox" id="aster" checked>
+    <span class="checkmark"></span>
+    <span class="checkbox-label">Звездочки</span>
+  </label>
+  
+  <div class="actions">
+    <button class="btn-copy" id="copyBtn">Скопировать</button>
+    <button class="btn-clear" id="clearBtn">Очистить</button>
+  </div>
+  
+  <div class="msg" id="msg"></div>
+  <div class="settings-hint">
+    <h3>📱 Как добавить на свой рабочий экран?</h3>
+    <ol>
+      <li>
+        <span class="platform platform-ios">iOS</span>
+        Safari — поделитесь (кнопка Share), выберите «Добавить на домашний экран», дайте имя и нажмите «Добавить».
+      </li>
+      <li>
+        <span class="platform platform-android">Android</span>
+        Chrome — меню (3 точки) → «Добавить на экран» → «Добавить».
+      </li>
+    </ol>
+  </div>
+</div>
 
 <script>
-(function() {
-  'use strict';
+// Карта раскладок: русский -> английский
+var cyr2lat = {
+  "й":"q","ц":"w","у":"e","к":"r","е":"t","н":"y","г":"u","ш":"i","щ":"o","з":"p","х":"[","ъ":"]","ё":"`",
+  "ф":"a","ы":"s","в":"d","а":"f","п":"g","р":"h","о":"j","л":"k","д":"l","ж":";","э":"'","я":"z",
+  "ч":"x","с":"c","м":"v","и":"b","т":"n","ь":"m","б":",","ю":"."," ":"-",
+  "Й":"Q","Ц":"W","У":"E","К":"R","Е":"T","Н":"Y","Г":"U","Ш":"I","Щ":"O","З":"P","Х":"[","Ъ":"]","Ё":"`",
+  "Ф":"A","Ы":"S","В":"D","А":"F","П":"G","Р":"H","О":"J","Л":"K","Д":"L","Ж":";","Э":"'","Я":"Z",
+  "Ч":"X","С":"C","М":"V","И":"B","Т":"N","Ь":"M","Б":",","Ю":"."," ":"-"
+};
 
-  // Карта раскладок: русский → английский (по позициям клавиш QWERTY)
-  var cyr2lat = {
-    "й":"q","ц":"w","у":"e","к":"r","е":"t","н":"y","г":"u","ш":"i","щ":"o","з":"p","х":"[","ъ":"]","ё":"0",
-    "ф":"a","ы":"s","в":"d","а":"f","п":"g","р":"h","о":"j","л":"k","д":"l","ж":";","э":"'","я":"z",
-    "ч":"x","с":"c","м":"v","и":"b","т":"n","ь":"m","б":",","ю":".", " ":"-",
-    "Й":"Q","Ц":"W","У":"E","К":"R","Е":"T","Н":"Y","Г":"U","Ш":"I","Щ":"O","З":"P","Х":"[","Ъ":"]","Ё":"0",
-    "Ф":"A","Ы":"S","В":"D","А":"F","П":"G","Р":"H","О":"J","Л":"K","Д":"L","Ж":";","Э":"'","Я":"Z",
-    "Ч":"X","С":"C","М":"V","И":"B","Т":"N","Ь":"M","Б":".","Ю":"."," ":"-"
-  };
+var lat2cyr = {};
+var lat2cyrUp = {};
+for (var key in cyr2lat) {
+  if (cyr2lat.hasOwnProperty(key)) {
+    var val = cyr2lat[key];
+    if (key === " ") continue;
+    var lowerKey = key.toLowerCase();
+    var lowerVal = val.toLowerCase();
+    lat2cyr[lowerVal] = lowerKey;
+    lat2cyrUp[val] = key;
+  }
+}
 
-  // Инвертированный словарь для обратного преобразования
-  var lat2cyr = {};
-  var lat2cyrUp = {};
-  for (var key in cyr2lat) {
-    if (cyr2lat.hasOwnProperty(key)) {
-      var val = cyr2lat[key];
-      if (key === " ") continue;
-      var lowerKey = key.toLowerCase();
-      var lowerVal = val.toLowerCase();
-      lat2cyr[lowerVal] = lowerKey;
-      lat2cyrUp[val] = key;
+var inputEl = document.getElementById('input');
+var outputEl = document.getElementById('output');
+var langSeg = document.querySelector('.seg');
+var asterChk = document.getElementById('aster');
+var copyBtn = document.getElementById('copyBtn');
+var clearBtn = document.getElementById('clearBtn');
+var msg = document.getElementById('msg');
+var lang = 'rus';
+var infoIcon = document.getElementById('infoIcon');
+var versionModal = document.getElementById('versionModal');
+var closeModal = document.getElementById('closeModal');
+
+langSeg.addEventListener('click', function(e) {
+  var btn = e.target;
+  while (btn && btn !== document.documentElement) {
+    if (btn.dataset && btn.dataset.lang) {
+      break;
     }
+    btn = btn.parentNode;
   }
-
-  // Элементы
-  var inputEl = document.getElementById('input');
-  var outputEl = document.getElementById('output');
-  var langSeg = document.querySelector('.seg');
-  var asterChk = document.getElementById('aster');
-  var copyBtn = document.getElementById('copyBtn');
-  var clearBtn = document.getElementById('clearBtn');
-  var msg = document.getElementById('msg');
-
-  var lang = 'rus'; // 'rus' | 'eng'
-
-  // Обработчик: когда меняется язык — нужно пересчитать
-  langSeg.addEventListener('click', function(e) {
-    var btn = e.target.closest('button');
-    if (!btn) return;
-    langSeg.querySelector('button').classList.remove('active');
-    btn.classList.add('active');
-    lang = btn.dataset.lang;
-    recalc();
-  });
-
-  // Обработчик: ввод текста → мгновенное преобразование
-  inputEl.addEventListener('input', recalc);
-
-  // Флажок звёздочек
-  asterChk.addEventListener('change', recalc);
-
-  // Очистка
-  clearBtn.addEventListener('click', function() {
-    inputEl.value = '';
-    outputEl.value = '';
-    msg.textContent = '';
-    inputEl.focus();
-  });
-
-  // Копирование
-  copyBtn.addEventListener('click', function() {
-    var outVal = outputEl.value;
-    if (!outVal) {
-      msg.textContent = 'Нет данных для копирования';
-      msg.className = 'msg';
-      return;
-    }
-
-    // Сохраняем в буфер обмена
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(outVal).then(function() {
-        showMsg('Скопировано в буфер', true);
-        clearFields();
-      }).catch(function() {
-        fallbackCopy(outVal);
-      });
-    } else {
-      fallbackCopy(outVal);
-    }
-  });
-
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      msg.textContent = 'Скопировано (ручной режим)';
-      msg.className = 'msg active';
-    } catch (e) {
-      msg.textContent = 'Ошибка копирования';
-      msg.className = 'msg';
-    }
-    document.body.removeChild(ta);
-    setTimeout(function() { msg.className = 'msg'; }, 1500);
+  if (!btn || !btn.dataset || !btn.dataset.lang) return;
+  var buttons = langSeg.querySelectorAll('button');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active');
   }
-
-  function showMsg(text, ok) {
-    msg.textContent = text;
-    msg.className = 'msg' + (ok ? ' active' : '');
-    setTimeout(function() { msg.className = 'msg'; }, 1500);
-  }
-
-  function clearFields() {
-    inputEl.value = '';
-    outputEl.value = '';
-    msg.textContent = '';
-    inputEl.focus();
-  }
-
-  // Пересчёт вывода
-  function recalc() {
-    var text = inputEl.value;
-    var transformed = transform(text, lang);
-    var display = asterChk.checked ? '*'.repeat(transformed.length) : transformed;
-    outputEl.value = display;
-    // Add aster class for styling
-    if (asterChk.checked) {
-      outputEl.classList.add('aster');
-    } else {
-      outputEl.classList.remove('aster');
-    }
-  }
-
-  // Преобразование одного символа
-  function transformChar(ch, lang) {
-    if (lang === 'rus') {
-      // Ввод русский → вывод английский (или наоборот, если буква латинская)
-      if (ch in cyr2lat) {
-        return cyr2lat[ch];
-      }
-      // Латинская буква → ищем в обратном направлении
-      if (ch.toLowerCase() in lat2cyr) {
-        return lat2cyr[ch.toLowerCase()];
-      }
-      return ch;
-    } else {
-      // Ввод английский → вывод русский
-      if (ch in lat2cyrUp) {
-        return lat2cyrUp[ch];
-      }
-      if (ch.toLowerCase() in lat2cyr) {
-        return lat2cyr[ch.toLowerCase()];
-      }
-      return ch;
-    }
-  }
-
-  function transform(text, lang) {
-    return Array.prototype.map.call(text, function(ch) {
-      return transformChar(ch, lang);
-    }).join('');
-  }
-
-  // Старт
+  btn.classList.add('active');
+  lang = btn.dataset.lang;
   recalc();
-})();
+});
+
+inputEl.addEventListener('input', recalc);
+
+asterChk.addEventListener('change', recalc);
+
+clearBtn.addEventListener('click', function() {
+  inputEl.value = '';
+  outputEl.value = '';
+  msg.textContent = '';
+  inputEl.focus();
+});
+
+copyBtn.addEventListener('click', function() {
+  var outVal = outputEl.value;
+  if (!outVal) {
+    msg.textContent = 'Нет данных для копирования';
+    msg.className = 'msg';
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(outVal).then(function() {
+      showMsg('Скопировано в буфер', true);
+      clearFields();
+    }).catch(function() {
+      fallbackCopy(outVal);
+    });
+  } else {
+    fallbackCopy(outVal);
+  }
+});
+
+infoIcon.addEventListener('click', function() {
+  versionModal.classList.add('show');
+});
+
+closeModal.addEventListener('click', function() {
+  versionModal.classList.remove('show');
+});
+
+window.addEventListener('click', function(e) {
+  if (e.target === versionModal) {
+    versionModal.classList.remove('show');
+  }
+});
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    msg.textContent = 'Скопировано (ручной режим)';
+    msg.className = 'msg active';
+  } catch (e) {
+    msg.textContent = 'Ошибка копирования';
+    msg.className = 'msg';
+  }
+  document.body.removeChild(ta);
+  setTimeout(function() { msg.className = 'msg'; }, 1500);
+}
+
+function showMsg(text, ok) {
+  msg.textContent = text;
+  msg.className = 'msg' + (ok ? ' active' : '');
+  setTimeout(function() { msg.className = 'msg'; }, 1500);
+}
+
+function clearFields() {
+  inputEl.value = '';
+  outputEl.value = '';
+  msg.textContent = '';
+  inputEl.focus();
+}
+
+function recalc() {
+  var text = inputEl.value;
+  var transformed = transform(text, lang);
+  var display = asterChk.checked ? '*'.repeat(transformed.length) : transformed;
+  outputEl.value = display;
+  if (asterChk.checked) {
+    outputEl.classList.add('aster');
+  } else {
+    outputEl.classList.remove('aster');
+  }
+}
+
+function transformChar(ch, lang) {
+  if (lang === 'rus') {
+    if (ch in cyr2lat) {
+      return cyr2lat[ch];
+    }
+    if (ch.toLowerCase() in lat2cyr) {
+      return lat2cyr[ch.toLowerCase()];
+    }
+    return ch;
+  } else {
+    if (ch in lat2cyrUp) {
+      return lat2cyrUp[ch];
+    }
+    if (ch.toLowerCase() in lat2cyr) {
+      return lat2cyr[ch.toLowerCase()];
+    }
+    return ch;
+  }
+}
+
+function transform(text, lang) {
+  return Array.prototype.map.call(text, function(ch) {
+    return transformChar(ch, lang);
+  }).join('');
+}
+
+recalc();
 </script>
 </body>
 </html>
