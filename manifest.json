@@ -1,2 +1,27 @@
-{"name":"RusoPass - транслятор раскладки","short_name":"RusoPass","version":"1.0.1","description":"Преобразует текст между русской и английской раскладками клавиатуры","start_url":"/","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":{"192x192":"icon.png","512x512":"icon.png"}}
-
+{
+  "name": "RusoPass - транслятор раскладки",
+  "short_name": "RusoPass",
+  "version": "1.1.0",
+  "description": "Преобразует текст между русской и английской раскладками клавиатуры",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
